@@ -45,19 +45,9 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
         public async Task<BaseUpdateResponse> Handle(UpdatePasswordCommand request, CancellationToken cancellationToken)
         {
             var user = await _unitOfWork.UserRepository.GetByIdAsync(request.Id);
-            if (user is null)
-            {
-                _notifications.AddNotification("Handle", "Informed user does not exist.");
-                return new BaseUpdateResponse();
-            }
+            ValidateNewPassword(request, user);
 
-            if (!request.Password.Equals(request.ConfirmPassword))
-            {
-                _notifications.AddNotification("Handle", "Passwords differ.");
-                return new BaseUpdateResponse();
-            }
-
-            user.UpdatePassword(request.Password);
+            user.UpdatePassword(request.NewPassword);
             await _unitOfWork.CommitAsync();
             return new BaseUpdateResponse();
         }
@@ -74,6 +64,18 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
             if (await _unitOfWork.UserRepository.IsPhoneExists(request.Phone))
                 _notifications.AddNotification("ValidateUser", "This phone is already registered.");
 
+        }
+
+        private void ValidateNewPassword(UpdatePasswordCommand request, User user)
+        {
+            if (user is null)
+                _notifications.AddNotification("Handle", "Informed user does not exist.");
+
+            if (!user.VerifyPassword(request.OldPassword))
+                _notifications.AddNotification("Handle", "Old Password differ.");
+
+            if (!request.NewPassword.Equals(request.ConfirmPassword))
+                _notifications.AddNotification("Handle", "Passwords differ.");
         }
         #endregion
     }

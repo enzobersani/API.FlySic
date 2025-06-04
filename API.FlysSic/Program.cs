@@ -26,6 +26,16 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 
+var basePath = Directory.GetCurrentDirectory();
+var csvPath = Path.Combine(basePath, "..", "API.FlySic.Infrastructure", "CSV", "iata-icao.csv");
+
+// 2. Registrar o serviço com a interface
+builder.Services.AddSingleton<IAirportService>(provider =>
+    new AirportService(csvPath));
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -53,9 +63,6 @@ builder.Services.AddMemoryCache();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
