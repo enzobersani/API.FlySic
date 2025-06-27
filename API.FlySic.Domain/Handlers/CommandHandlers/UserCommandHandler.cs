@@ -10,7 +10,8 @@ using Microsoft.Extensions.Configuration;
 namespace API.FlySic.Domain.Handlers.CommandHandlers
 {
     public class UserCommandHandler : IRequestHandler<NewUserCommand, BaseResponse>,
-                                      IRequestHandler<UpdatePasswordCommand, BaseUpdateResponse>
+                                      IRequestHandler<UpdatePasswordCommand, BaseUpdateResponse>,
+                                      IRequestHandler<UpdateFirstAccessCommand, BaseUpdateResponse>
     {
         private readonly INotificationService _notifications;
         private readonly IUnitOfWork _unitOfWork;
@@ -50,6 +51,24 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
             user.UpdatePassword(request.NewPassword);
             await _unitOfWork.CommitAsync();
             return new BaseUpdateResponse();
+        }
+
+        public async Task<BaseUpdateResponse> Handle(UpdateFirstAccessCommand request, CancellationToken cancellationToken)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(request.UserId);
+            if (user is null)
+            {
+                _notifications.AddNotification("Handle", "Usuário informado não encontrado");
+                return new BaseUpdateResponse();
+            }
+
+            user.UpdateIsFirstAccess();
+            await _unitOfWork.CommitAsync();
+
+            return new BaseUpdateResponse
+            {
+                DateTime = DateTime.UtcNow
+            };
         }
 
         #region Private Methods

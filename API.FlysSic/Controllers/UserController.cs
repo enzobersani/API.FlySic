@@ -3,6 +3,7 @@ using API.FlySic.Domain.Commands;
 using API.FlySic.Domain.Interfaces.Services;
 using API.FlySic.Domain.Models.Response.Base;
 using API.FlySic.Domain.Notifications;
+using API.FlySic.Domain.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,5 +42,28 @@ namespace API.FlySic.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordCommand request)
             => Response(await _mediator.Send(request), 200);
+
+        /// <summary>
+        /// Atualiza o status do primeiro acesso do usuário.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("first-access")]
+        [ProducesResponseType(typeof(BaseUpdateResponse), 200)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        [Produces("application/json")]
+        public async Task<IActionResult> UpdateFirstAccess([FromBody] UpdateFirstAccessCommand request)
+            => Response(await _mediator.Send(request), 200);
+
+        /// <summary>
+        /// Retorna se é o primeiro acesso do usuário.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        [HttpGet("first-access-status/{userId:guid}")]
+        [ProducesResponseType(typeof(bool), 200)]
+        [Produces("application/json")]
+        public async Task<IActionResult> GetFirstAccessStatus([FromRoute] Guid userId)
+            => Ok(await _mediator.Send(new GetFirstAccessStatusQuery(userId)));
     }
 }

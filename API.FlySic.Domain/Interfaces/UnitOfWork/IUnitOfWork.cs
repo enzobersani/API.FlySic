@@ -11,5 +11,6 @@ namespace API.FlySic.Domain.Interfaces.UnitOfWork
     {
         Task<bool> CommitAsync();
         IUserRepository UserRepository { get; }
+        IFlightFormRepository FlightFormRepository { get; }
     }
 }

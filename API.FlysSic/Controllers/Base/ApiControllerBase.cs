@@ -17,10 +17,10 @@ namespace API.FlySic.Controllers.Base
             {
                 var notifications = _notifications.GetNotifications();
 
-                //if (notifications.Any(e => e.Code == "Unauthorized"))
-                //{
-                //    return Unauthorized(new { notifications });
-                //}
+                if (notifications.Any(e => e.Code == "Unauthorized"))
+                {
+                    return Unauthorized(new { notifications });
+                }
 
                 return BadRequest(new { notifications });
             }

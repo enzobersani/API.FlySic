@@ -3,12 +3,7 @@ using API.FlySic.Domain.ModelMap;
 using API.FlySic.Domain.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace API.FlySic.Domain.Services
 {

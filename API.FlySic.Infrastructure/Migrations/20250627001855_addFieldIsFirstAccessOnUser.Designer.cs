@@ -3,6 +3,7 @@ using System;
 using API.FlySic.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.FlySic.Infrastructure.Migrations
 {
     [DbContext(typeof(ApiFlySicDbContext))]
-    partial class ApiFlySicDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627001855_addFieldIsFirstAccessOnUser")]
+    partial class addFieldIsFirstAccessOnUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,62 +24,6 @@ namespace API.FlySic.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("API.FlySic.Domain.Entities.FlightForm", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("AircraftType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ArrivalAirport")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ArrivalDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ArrivalManualLocation")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ArrivalTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DepartureAirport")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("DepartureDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DepartureManualLocation")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("DepartureTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FlightComment")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("HasOvernight")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("FlightForm");
-                });
 
             modelBuilder.Entity("API.FlySic.Domain.Entities.User", b =>
                 {
@@ -131,17 +78,6 @@ namespace API.FlySic.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("API.FlySic.Domain.Entities.FlightForm", b =>
-                {
-                    b.HasOne("API.FlySic.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

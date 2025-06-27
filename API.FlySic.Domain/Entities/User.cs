@@ -19,12 +19,15 @@ namespace API.FlySic.Domain.Entities
         public bool IsSearchHours { get; private set; }
         public UserStatusEnum Status { get; private set; }
         public string Password { get; private set; }
+        public bool IsFirstAccess { get; private set; } = true;
+
         private User(){}
         public static User New(NewUserCommand request)
         {
             var user = new User();
             request.Adapt(user);
             user.BirthDate = request.BirthDate.ToUniversalTime();
+            user.IsFirstAccess = true;
             user.GenerateAutomaticPassword();
             return user;
         }
@@ -50,6 +53,7 @@ namespace API.FlySic.Domain.Entities
             if (string.IsNullOrWhiteSpace(newPassword))
                 throw new ArgumentException("A senha não pode ser vazia");
 
+            SetUpdatedAt();
             Password = HashPassword(newPassword);
         }
 
@@ -61,6 +65,12 @@ namespace API.FlySic.Domain.Entities
             var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
             var test =  Convert.ToBase64String(hashedBytes);
             return test;
+        }
+
+        public void UpdateIsFirstAccess()
+        {
+            IsFirstAccess = false;
+            SetUpdatedAt();
         }
     }
 }
