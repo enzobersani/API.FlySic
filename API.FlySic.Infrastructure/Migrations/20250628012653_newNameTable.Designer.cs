@@ -3,6 +3,7 @@ using System;
 using API.FlySic.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace API.FlySic.Infrastructure.Migrations
 {
     [DbContext(typeof(ApiFlySicDbContext))]
-    partial class ApiFlySicDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250628012653_newNameTable")]
+    partial class newNameTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,33 +79,6 @@ namespace API.FlySic.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("FlightForms");
-                });
-
-            modelBuilder.Entity("API.FlySic.Domain.Entities.FlightFormInterest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("FlightFormId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("InterestedUserId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FlightFormId");
-
-                    b.HasIndex("InterestedUserId");
-
-                    b.ToTable("FlightFormInterests");
                 });
 
             modelBuilder.Entity("API.FlySic.Domain.Entities.User", b =>
@@ -169,30 +145,6 @@ namespace API.FlySic.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("API.FlySic.Domain.Entities.FlightFormInterest", b =>
-                {
-                    b.HasOne("API.FlySic.Domain.Entities.FlightForm", "FlightForm")
-                        .WithMany("Interests")
-                        .HasForeignKey("FlightFormId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.FlySic.Domain.Entities.User", "InterestedUser")
-                        .WithMany()
-                        .HasForeignKey("InterestedUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FlightForm");
-
-                    b.Navigation("InterestedUser");
-                });
-
-            modelBuilder.Entity("API.FlySic.Domain.Entities.FlightForm", b =>
-                {
-                    b.Navigation("Interests");
                 });
 #pragma warning restore 612, 618
         }

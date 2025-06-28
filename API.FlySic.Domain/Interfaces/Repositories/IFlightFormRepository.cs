@@ -10,5 +10,6 @@ namespace API.FlySic.Domain.Interfaces.Repositories
 {
     public interface IFlightFormRepository : IBaseRepository<FlightForm>
     {
+        Task<List<FlightForm>> GetByUserId(Guid userId);
     }
 }

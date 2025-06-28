@@ -1,7 +1,11 @@
 ﻿using API.FlySic.Controllers.Base;
 using API.FlySic.Domain.Commands;
+using API.FlySic.Domain.Entities;
+using API.FlySic.Domain.Interfaces.Context;
+using API.FlySic.Domain.Models.Response;
 using API.FlySic.Domain.Models.Response.Base;
 using API.FlySic.Domain.Notifications;
+using API.FlySic.Domain.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +15,11 @@ namespace API.FlySic.Controllers
     public class FlightController : ApiControllerBase
     {
         private readonly IMediator _mediator;
-        public FlightController(INotificationService notifications, IMediator mediator) : base(notifications)
+        private readonly IUserContext _userContext;
+        public FlightController(INotificationService notifications, IMediator mediator, IUserContext userContext) : base(notifications)
         {
             _mediator = mediator;
+            _userContext = userContext;
         }
 
         /// <summary>
@@ -27,5 +33,33 @@ namespace API.FlySic.Controllers
         [ProducesResponseType(typeof(Notification), 400)]
         public async Task<IActionResult> Post([FromBody] NewFlightFormCommand request)
             => Response(await _mediator.Send(request), 201);
+
+        /// <summary>
+        /// Retorna lista de fichas de voo do piloto autenticado.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpGet("my-flights")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(List<MyFlightFormsResponseModel>), 200)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        public async Task<IActionResult> GetMyFlights()
+        {
+            var userId = _userContext.GetUserId();
+            if (userId == Guid.Empty) return Unauthorized();
+            return Response(await _mediator.Send(new MyFlightFormsQuery(userId)), 200);
+        }
+
+        /// <summary>
+        /// Demonstra interesse no voo.
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPost("flight-interest")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ExpressInterestCommand), 201)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        public async Task<IActionResult> ExpressInterest([FromBody] ExpressInterestCommand command)
+            => Response(await _mediator.Send(command), 201);
     }
 }

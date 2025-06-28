@@ -23,6 +23,9 @@ namespace API.FlySic.Domain.Entities
         public string? FlightComment { get; private set; }
         public bool HasOvernight { get; private set; }
 
+        public ICollection<FlightFormInterest> Interests { get; private set; } = new List<FlightFormInterest>();
+
+
         private FlightForm() { }
 
         public static FlightForm New(NewFlightFormCommand request)

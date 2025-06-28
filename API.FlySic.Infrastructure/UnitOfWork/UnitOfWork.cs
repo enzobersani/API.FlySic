@@ -17,6 +17,7 @@ namespace API.FlySic.Infrastructure.UnitOfWork
         private readonly INotificationService _notifications;
         private IUserRepository _userRespository;
         private IFlightFormRepository _flightFormRepository;
+        private IFlightFormInterestRepository _flightFormInterestRepository;
 
         public UnitOfWork(ApiFlySicDbContext context, INotificationService notifications)
         {
@@ -28,6 +29,8 @@ namespace API.FlySic.Infrastructure.UnitOfWork
             => _userRespository ??= new UserRepository(_context, _notifications);
         public IFlightFormRepository FlightFormRepository
             => _flightFormRepository ??= new FlightFormRepository(_context, _notifications);
+        public IFlightFormInterestRepository FlightFormInterestRepository
+            => _flightFormInterestRepository ??= new FlightFormInterestRepository(_context, _notifications);
 
         public async Task<bool> CommitAsync()
         {

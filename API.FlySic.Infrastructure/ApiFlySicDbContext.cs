@@ -7,6 +7,8 @@ namespace API.FlySic.Infrastructure
     {
         public ApiFlySicDbContext(DbContextOptions<ApiFlySicDbContext> options) : base(options) { }
         public DbSet<User> Users { get; set; }
+        public DbSet<FlightForm> FlightForms { get; set; }
+        public DbSet<FlightFormInterest> FlightFormInterests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -18,5 +18,8 @@ namespace API.FlySic.Infrastructure.Repositories
         {
             _context = context;
         }
+
+        public async Task<List<FlightForm>> GetByUserId(Guid userId)
+            => await _context.FlightForms.AsNoTracking().Where(x => x.UserId == userId).ToListAsync();
     }
 }
