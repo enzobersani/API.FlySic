@@ -61,5 +61,17 @@ namespace API.FlySic.Controllers
         [ProducesResponseType(typeof(Notification), 400)]
         public async Task<IActionResult> ExpressInterest([FromBody] ExpressInterestCommand command)
             => Response(await _mediator.Send(command), 201);
+
+        /// <summary>
+        /// Retorna lista de fichas de voo do piloto autenticado.
+        /// </summary>
+        /// <param name="flightFormId"></param>
+        /// <returns></returns>
+        [HttpGet("{flightFormId:guid}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(List<FlightInterestResponse>), 200)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        public async Task<IActionResult> GetMyFlights(Guid flightFormId)
+            => Response(await _mediator.Send(new GetFlightInterestsQuery { FlightFormId = flightFormId }), 200);
     }
 }

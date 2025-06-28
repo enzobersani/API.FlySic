@@ -6,12 +6,13 @@ using MediatR;
 
 namespace API.FlySic.Domain.Handlers.QueryHandlers
 {
-    public class FlightFormQueryHandler : IRequestHandler<MyFlightFormsQuery, List<MyFlightFormsResponseModel>>
+    public class FlightQueryHandler : IRequestHandler<MyFlightFormsQuery, List<MyFlightFormsResponseModel>>,
+                                      IRequestHandler<GetFlightInterestsQuery, List<FlightInterestResponse>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationService _notification;
 
-        public FlightFormQueryHandler(IUnitOfWork unitOfWork, INotificationService notification)
+        public FlightQueryHandler(IUnitOfWork unitOfWork, INotificationService notification)
         {
             _unitOfWork = unitOfWork;
             _notification = notification;
@@ -45,6 +46,18 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
             }).ToList();
 
             return result;
+        }
+
+        public async Task<List<FlightInterestResponse>> Handle(GetFlightInterestsQuery request, CancellationToken cancellationToken)
+        {
+            var interests = await _unitOfWork.FlightFormInterestRepository.GetByFlightFormIdAsync(request.FlightFormId);
+
+            return interests.Select(i => new FlightInterestResponse
+            {
+                UserId = i.InterestedUser.Id,
+                Name = i.InterestedUser.Name,
+                Email = i.InterestedUser.Email,
+            }).ToList();
         }
     }
 }
