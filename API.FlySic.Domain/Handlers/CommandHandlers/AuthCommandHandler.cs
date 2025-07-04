@@ -91,7 +91,7 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
         #region Validate Recovery Code
         public async Task<bool> Handle(ValidateRecoveryCodeCommand request, CancellationToken cancellationToken)
         {
-            var isValid = await _unitOfWork.RecoveryCodeRepository.ValidateCodeAsync(request.Email, request.RecoveryCode);
+            var isValid = await _unitOfWork.RecoveryCodeRepository.ValidateCodeAsync(request.Email, request.Code);
             if (!isValid)
             {
                 _notifications.AddNotification("Handle", "Invalid or expired recovery code.");
@@ -105,6 +105,7 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
         #region Reset Password
         public async Task<Unit> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
+            
             var user = await _unitOfWork.UserRepository.GetByEmail(request.Email);
             if (user is null)
             {
@@ -112,7 +113,7 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
                 return Unit.Value;
             }
 
-            var isValid = await _unitOfWork.RecoveryCodeRepository.ValidateCodeAsync(request.Email, request.RecoveryCode);
+            var isValid = await _unitOfWork.RecoveryCodeRepository.ValidateCodeAsync(request.Email, request.Code);
             if (!isValid)
             {
                 _notifications.AddNotification("Handle", "Invalid or expired recovery code.");

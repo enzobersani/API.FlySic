@@ -47,6 +47,7 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
         {
             var user = await _unitOfWork.UserRepository.GetByIdAsync(request.UserId);
             ValidateNewPassword(request, user);
+            if (_notifications.HasNotifications()) return new BaseUpdateResponse();
 
             user.UpdatePassword(request.NewPassword);
             await _unitOfWork.CommitAsync();

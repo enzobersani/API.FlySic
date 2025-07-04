@@ -1,21 +1,26 @@
-﻿using API.FlySic.Domain.Interfaces.UnitOfWork;
+﻿using API.FlySic.Domain.Interfaces.Context;
+using API.FlySic.Domain.Interfaces.UnitOfWork;
 using API.FlySic.Domain.Models.Response;
 using API.FlySic.Domain.Notifications;
 using API.FlySic.Domain.Queries;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.FlySic.Domain.Handlers.QueryHandlers
 {
     public class FlightQueryHandler : IRequestHandler<MyFlightFormsQuery, List<MyFlightFormsResponseModel>>,
-                                      IRequestHandler<GetFlightInterestsQuery, List<FlightInterestResponse>>
+                                      IRequestHandler<GetFlightInterestsQuery, List<FlightInterestResponse>>,
+                                      IRequestHandler<SearchFlightFormsQuery, List<SearchFlightFormsResponseModel>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationService _notification;
+        private readonly IUserContext _userContext;
 
-        public FlightQueryHandler(IUnitOfWork unitOfWork, INotificationService notification)
+        public FlightQueryHandler(IUnitOfWork unitOfWork, INotificationService notification, IUserContext userContext)
         {
             _unitOfWork = unitOfWork;
             _notification = notification;
+            _userContext = userContext;
         }
 
         public async Task<List<MyFlightFormsResponseModel>> Handle(MyFlightFormsQuery request, CancellationToken cancellationToken)
@@ -58,6 +63,58 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 Name = i.InterestedUser.Name,
                 Email = i.InterestedUser.Email,
             }).ToList();
+        }
+
+        public async Task<List<SearchFlightFormsResponseModel>> Handle(SearchFlightFormsQuery request, CancellationToken cancellationToken)
+        {
+            var userId = _userContext.GetUserId();
+
+            var query = _unitOfWork.FlightFormRepository
+                .Query(include => include.Include(f => f.User))
+                .AsQueryable();
+
+            if (userId != Guid.Empty)
+                query = query.Where(f => f.UserId != userId);
+
+            if (request.DepartureDate.HasValue)
+                query = query.Where(f => f.DepartureDate.Date == request.DepartureDate.Value.Date);
+
+            if (request.ArrivalDate.HasValue)
+                query = query.Where(f => f.ArrivalDate.Date == request.ArrivalDate.Value.Date);
+
+            if (!string.IsNullOrWhiteSpace(request.DepartureLocation))
+                query = query.Where(f =>
+                (f.DepartureAirport ?? "").Contains(request.DepartureLocation) ||
+                (f.DepartureManualLocation ?? "").Contains(request.DepartureLocation));
+
+            if (!string.IsNullOrWhiteSpace(request.ArrivalLocation))
+                query = query.Where(f =>
+                (f.ArrivalAirport ?? "").Contains(request.ArrivalLocation) ||
+                (f.ArrivalManualLocation ?? "").Contains(request.ArrivalLocation));
+
+            var result = await query
+                .OrderBy(f => f.DepartureDate)
+                .Select(f => new SearchFlightFormsResponseModel
+                {
+                    Id = f.Id,
+                    DepartureDate = f.DepartureDate,
+                    DepartureAirport = f.DepartureAirport,
+                    DepartureManualLocation = f.DepartureManualLocation,
+                    ArrivalDate = f.ArrivalDate,
+                    ArrivalAirport = f.ArrivalAirport,
+                    ArrivalManualLocation = f.ArrivalManualLocation,
+                    AircraftType = f.AircraftType,
+                    HasOvernight = f.HasOvernight,
+                    Pilot = new PilotResponseModel
+                    {
+                        Id = f.User.Id,
+                        Name = f.User.Name,
+                        Email = f.User.Email,
+                        Phone = f.User.Phone
+                    }
+                }).ToListAsync(cancellationToken);
+
+            return result;
         }
     }
 }

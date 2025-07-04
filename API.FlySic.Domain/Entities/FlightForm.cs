@@ -1,5 +1,6 @@
 ﻿using API.FlySic.Domain.Commands;
 using API.FlySic.Domain.Entities.Base;
+using API.FlySic.Domain.Enum;
 using Mapster;
 
 namespace API.FlySic.Domain.Entities
@@ -22,9 +23,9 @@ namespace API.FlySic.Domain.Entities
         public string AircraftType { get; private set; } = string.Empty;
         public string? FlightComment { get; private set; }
         public bool HasOvernight { get; private set; }
+        public FlightFormStatus Status { get; private set; } = FlightFormStatus.Aberta;
 
         public ICollection<FlightFormInterest> Interests { get; private set; } = new List<FlightFormInterest>();
-
 
         private FlightForm() { }
 
@@ -36,6 +37,7 @@ namespace API.FlySic.Domain.Entities
             flightForm.DepartureTime = flightForm.DepartureTime.ToUniversalTime();
             flightForm.ArrivalDate = flightForm.ArrivalDate.ToUniversalTime();
             flightForm.ArrivalTime = flightForm.ArrivalTime.ToUniversalTime();
+            flightForm.Status = FlightFormStatus.Aberta;
             return flightForm;
         }
     }

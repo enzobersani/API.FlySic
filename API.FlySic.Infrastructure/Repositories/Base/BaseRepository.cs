@@ -45,5 +45,12 @@ namespace API.FlySic.Infrastructure.Repositories.Base
                 await _context.SaveChangesAsync();
             }
         }
+
+        public IQueryable<TEntity> Query(Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null)
+        {
+            var query = _context.Set<TEntity>().AsQueryable();
+            return include != null ? include(query) : query;
+        }
+
     }
 }

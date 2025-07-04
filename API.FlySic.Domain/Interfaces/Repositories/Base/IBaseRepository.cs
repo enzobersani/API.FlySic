@@ -13,5 +13,6 @@ namespace API.FlySic.Domain.Interfaces.Repositories.Base
         Task AddAsync(TEntity entity);
         Task UpdateAsync(TEntity entity);
         Task DeleteAsync(Guid id);
+        IQueryable<TEntity> Query(Func<IQueryable<TEntity>, IQueryable<TEntity>>? include = null);
     }
 }
