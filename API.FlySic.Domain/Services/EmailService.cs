@@ -1,11 +1,12 @@
-﻿using API.FlySic.Domain.Interfaces.Services;
-using MailKit.Security;
-using Microsoft.Extensions.Configuration;
-using MimeKit;
-using MailKit.Net.Smtp;
-using System.Linq.Expressions;
+﻿using API.FlySic.Domain.Commands;
+using API.FlySic.Domain.Interfaces.Services;
+using API.FlySic.Domain.Models;
 using API.FlySic.Domain.Notifications;
-using API.FlySic.Domain.Commands;
+using MailKit.Security;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using MimeKit;
 
 namespace API.FlySic.Domain.Services
 {
@@ -13,11 +14,13 @@ namespace API.FlySic.Domain.Services
     {
         private readonly IConfiguration _configuration;
         private readonly INotificationService _notification;
+        private readonly EmailSettings _settings;
 
-        public EmailService(IConfiguration configuration, INotificationService notification)
+        public EmailService(IConfiguration configuration, INotificationService notification, IOptions<EmailSettings> settings)
         {
             _configuration = configuration;
             _notification = notification;
+            _settings = settings.Value;
         }
 
         public async Task SendNewUserEmailAsync(string toEmail, NewUserCommand form)
@@ -34,7 +37,7 @@ namespace API.FlySic.Domain.Services
                 // Corpo em HTML
                 builder.HtmlBody = $@"
                         <div style='font-family: Arial, sans-serif; padding: 20px; color: #333;'>
-                            <h2 style='color: #0066cc;'>📩 Novo cadastro recebido no FlySic</h2>
+                            <h2 style='color: #f69752;'>📩 Novo cadastro recebido no FlySic</h2>
                             <p>Segue abaixo os dados do novo usuário:</p>
                             <table style='border-collapse: collapse; width: 100%; margin-top: 10px;'>
                                 <tr><td style='padding: 8px; font-weight: bold;'>Nome:</td><td>{form.Name}</td></tr>
@@ -79,6 +82,42 @@ namespace API.FlySic.Domain.Services
             catch (Exception ex)
             {
                 _notification.AddNotification("SendNewUserEmailAsync", ex.ToString());
+            }
+        }
+
+        public async Task SendEmailAsync(string toEmail, string subject, string htmlBody, string textBody = "", IFormFile? attachment = null)
+        {
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(_settings.FromName, _settings.FromEmail));
+                message.To.Add(MailboxAddress.Parse(toEmail));
+                message.Subject = subject;
+
+                var builder = new BodyBuilder
+                {
+                    HtmlBody = htmlBody,
+                    TextBody = textBody
+                };
+
+                if (attachment != null && attachment.Length > 0)
+                {
+                    using var memoryStream = new MemoryStream();
+                    await attachment.CopyToAsync(memoryStream);
+                    builder.Attachments.Add(attachment.FileName, memoryStream.ToArray());
+                }
+
+                message.Body = builder.ToMessageBody();
+
+                using var client = new MailKit.Net.Smtp.SmtpClient();
+                await client.ConnectAsync(_settings.SmtpHost, _settings.SmtpPort, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_settings.SmtpUser, _settings.SmtpPassword);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+            }
+            catch (Exception ex)
+            {
+                _notification.AddNotification("SendEmailAsync", ex.ToString());
             }
         }
     }

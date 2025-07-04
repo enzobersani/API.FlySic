@@ -3,11 +3,6 @@ using API.FlySic.Domain.Interfaces.Repositories;
 using API.FlySic.Domain.Notifications;
 using API.FlySic.Infrastructure.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace API.FlySic.Infrastructure.Repositories
 {

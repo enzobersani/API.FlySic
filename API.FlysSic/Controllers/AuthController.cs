@@ -24,5 +24,32 @@ namespace API.FlySic.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] AuthCommand request)
             => Response(await _mediator.Send(request), 200);
+
+        /// <summary>
+        /// Receber código de recuperação
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("recovery-code")]
+        public async Task<IActionResult> RecoveryCode([FromBody] RecoveryCodeCommand request)
+            => Response(await _mediator.Send(request), 201);
+
+        /// <summary>
+        /// Valida código de recuperação
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("validate-recovery-code")]
+        public async Task<IActionResult> ValidateRecoveryCode([FromBody] ValidateRecoveryCodeCommand request)
+            => Response(await _mediator.Send(request), 200);
+
+        /// <summary>
+        /// Resetar senha
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand request)
+            => Response(await _mediator.Send(request), 200);
     }
 }

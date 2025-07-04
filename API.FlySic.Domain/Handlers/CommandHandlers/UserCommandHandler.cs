@@ -45,7 +45,7 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
 
         public async Task<BaseUpdateResponse> Handle(UpdatePasswordCommand request, CancellationToken cancellationToken)
         {
-            var user = await _unitOfWork.UserRepository.GetByIdAsync(request.Id);
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(request.UserId);
             ValidateNewPassword(request, user);
 
             user.UpdatePassword(request.NewPassword);

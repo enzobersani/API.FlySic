@@ -2,6 +2,7 @@ using API.FlySic;
 using API.FlySic.Domain;
 using API.FlySic.Domain.Interfaces.Context;
 using API.FlySic.Domain.Interfaces.Services;
+using API.FlySic.Domain.Models;
 using API.FlySic.Domain.Notifications;
 using API.FlySic.Domain.Services;
 using API.FlySic.Infrastructure;
@@ -60,7 +61,7 @@ builder.Services.AddAuthentication(options =>
 // 2. Registrar o serviço com a interface
 builder.Services.AddSingleton<IAirportService>(provider =>
     new AirportService(csvPath));
-
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
