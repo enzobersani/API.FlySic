@@ -85,5 +85,17 @@ namespace API.FlySic.Controllers
         [ProducesResponseType(typeof(Notification), 400)]
         public async Task<IActionResult> SearchFlights([FromQuery] SearchFlightFormsQuery request)
             => Response(await _mediator.Send(request), 200);
+
+        /// <summary>
+        /// Retorna ficha de voo pelo ID.
+        /// </summary>
+        /// <param name="flightFormId"></param>
+        /// <returns></returns>
+        [HttpGet("flight-form/{flightFormId:guid}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(SearchFlightFormsResponseModel), 200)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        public async Task<IActionResult> GetFlightFormById(Guid flightFormId)
+            => Response(await _mediator.Send(new GetFlightFormById(flightFormId)), 200);
     }
 }

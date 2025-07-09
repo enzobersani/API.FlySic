@@ -10,7 +10,8 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
 {
     public class FlightQueryHandler : IRequestHandler<MyFlightFormsQuery, List<MyFlightFormsResponseModel>>,
                                       IRequestHandler<GetFlightInterestsQuery, List<FlightInterestResponse>>,
-                                      IRequestHandler<SearchFlightFormsQuery, List<SearchFlightFormsResponseModel>>
+                                      IRequestHandler<SearchFlightFormsQuery, List<SearchFlightFormsResponseModel>>,
+                                      IRequestHandler<GetFlightFormById, SearchFlightFormsResponseModel>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationService _notification;
@@ -73,8 +74,8 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 .Query(include => include.Include(f => f.User))
                 .AsQueryable();
 
-            if (userId != Guid.Empty)
-                query = query.Where(f => f.UserId != userId);
+            //if (userId != Guid.Empty)
+            //    query = query.Where(f => f.UserId != userId);
 
             if (request.DepartureDate.HasValue)
                 query = query.Where(f => f.DepartureDate.Date == request.DepartureDate.Value.Date);
@@ -105,6 +106,9 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                     ArrivalManualLocation = f.ArrivalManualLocation,
                     AircraftType = f.AircraftType,
                     HasOvernight = f.HasOvernight,
+                    FlightComment = f.FlightComment,
+                    ArrivalTime = f.ArrivalTime,
+                    DepartureTime = f.DepartureTime,
                     Pilot = new PilotResponseModel
                     {
                         Id = f.User.Id,
@@ -115,6 +119,45 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 }).ToListAsync(cancellationToken);
 
             return result;
+        }
+
+        public Task<SearchFlightFormsResponseModel> Handle(GetFlightFormById request, CancellationToken cancellationToken)
+        {
+            var flightForm = _unitOfWork.FlightFormRepository
+                .Query(include => include.Include(f => f.User))
+                .FirstOrDefaultAsync(f => f.Id == request.FlightFormId, cancellationToken);
+
+            return flightForm.ContinueWith(task =>
+            {
+                if (task.Result == null)
+                {
+                    _notification.AddNotification("GetFlightFormById", "Ficha de voo não encontrada.");
+                    return new SearchFlightFormsResponseModel();
+                }
+                var f = task.Result;
+                return new SearchFlightFormsResponseModel
+                {
+                    Id = f.Id,
+                    DepartureDate = f.DepartureDate,
+                    DepartureAirport = f.DepartureAirport,
+                    DepartureManualLocation = f.DepartureManualLocation,
+                    ArrivalDate = f.ArrivalDate,
+                    ArrivalAirport = f.ArrivalAirport,
+                    ArrivalManualLocation = f.ArrivalManualLocation,
+                    AircraftType = f.AircraftType,
+                    HasOvernight = f.HasOvernight,
+                    FlightComment = f.FlightComment,
+                    ArrivalTime = f.ArrivalTime,
+                    DepartureTime = f.DepartureTime,
+                    Pilot = new PilotResponseModel
+                    {
+                        Id = f.User.Id,
+                        Name = f.User.Name,
+                        Email = f.User.Email,
+                        Phone = f.User.Phone
+                    }
+                };
+            }, cancellationToken);
         }
     }
 }
