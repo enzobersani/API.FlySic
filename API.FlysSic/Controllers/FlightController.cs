@@ -63,11 +63,11 @@ namespace API.FlySic.Controllers
             => Response(await _mediator.Send(command), 201);
 
         /// <summary>
-        /// Retorna lista de fichas de voo do piloto autenticado.
+        /// Retorna lista de interessados em um voo específico.
         /// </summary>
         /// <param name="flightFormId"></param>
         /// <returns></returns>
-        [HttpGet("{flightFormId:guid}")]
+        [HttpGet("interests/{flightFormId:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(List<FlightInterestResponse>), 200)]
         [ProducesResponseType(typeof(Notification), 400)]

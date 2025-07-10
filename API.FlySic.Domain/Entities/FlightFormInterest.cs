@@ -1,4 +1,5 @@
 ﻿using API.FlySic.Domain.Entities.Base;
+using API.FlySic.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace API.FlySic.Domain.Entities
         public FlightForm FlightForm { get; private set; } = null!;
         public Guid InterestedUserId { get; private set; }
         public User InterestedUser { get; private set; } = null!;
+        public FlightFormInterestStatus Status { get; private set; } = FlightFormInterestStatus.Pending;
 
         private FlightFormInterest() { }
 
@@ -21,8 +23,18 @@ namespace API.FlySic.Domain.Entities
             return new FlightFormInterest
             {
                 FlightFormId = flightFormId,
-                InterestedUserId = interestedUserId
+                InterestedUserId = interestedUserId,
+                Status = FlightFormInterestStatus.Pending
             };
+        }
+
+        public void Accept()
+        {
+            Status = FlightFormInterestStatus.Accepted;
+        }
+        public void Reject()
+        {
+            Status = FlightFormInterestStatus.Rejected;
         }
     }
 }

@@ -63,6 +63,7 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 UserId = i.InterestedUser.Id,
                 Name = i.InterestedUser.Name,
                 Email = i.InterestedUser.Email,
+                Phone = i.InterestedUser.Phone,
             }).ToList();
         }
 
