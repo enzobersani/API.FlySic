@@ -74,8 +74,8 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 .Query(include => include.Include(f => f.User))
                 .AsQueryable();
 
-            //if (userId != Guid.Empty)
-            //    query = query.Where(f => f.UserId != userId);
+            if (userId != Guid.Empty)
+                query = query.Where(f => f.UserId != userId);
 
             if (request.DepartureDate.HasValue)
                 query = query.Where(f => f.DepartureDate.Date == request.DepartureDate.Value.Date);
@@ -85,79 +85,94 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
 
             if (!string.IsNullOrWhiteSpace(request.DepartureLocation))
                 query = query.Where(f =>
-                (f.DepartureAirport ?? "").Contains(request.DepartureLocation) ||
-                (f.DepartureManualLocation ?? "").Contains(request.DepartureLocation));
+                    (f.DepartureAirport ?? "").Contains(request.DepartureLocation) ||
+                    (f.DepartureManualLocation ?? "").Contains(request.DepartureLocation));
 
             if (!string.IsNullOrWhiteSpace(request.ArrivalLocation))
                 query = query.Where(f =>
-                (f.ArrivalAirport ?? "").Contains(request.ArrivalLocation) ||
-                (f.ArrivalManualLocation ?? "").Contains(request.ArrivalLocation));
+                    (f.ArrivalAirport ?? "").Contains(request.ArrivalLocation) ||
+                    (f.ArrivalManualLocation ?? "").Contains(request.ArrivalLocation));
 
-            var result = await query
+            var flights = await query
                 .OrderBy(f => f.DepartureDate)
-                .Select(f => new SearchFlightFormsResponseModel
+                .ToListAsync(cancellationToken);
+
+            var flightFormIds = flights.Select(f => f.Id).ToList();
+
+            var userInterests = await _unitOfWork.FlightFormInterestRepository
+                .Query()
+                .Where(i => i.InterestedUserId == userId && flightFormIds.Contains(i.FlightFormId))
+                .Select(i => i.FlightFormId)
+                .ToListAsync(cancellationToken);
+
+            var result = flights.Select(f => new SearchFlightFormsResponseModel
+            {
+                Id = f.Id,
+                DepartureDate = f.DepartureDate,
+                DepartureAirport = f.DepartureAirport,
+                DepartureManualLocation = f.DepartureManualLocation,
+                ArrivalDate = f.ArrivalDate,
+                ArrivalAirport = f.ArrivalAirport,
+                ArrivalManualLocation = f.ArrivalManualLocation,
+                AircraftType = f.AircraftType,
+                HasOvernight = f.HasOvernight,
+                FlightComment = f.FlightComment,
+                ArrivalTime = f.ArrivalTime,
+                DepartureTime = f.DepartureTime,
+                Pilot = new PilotResponseModel
                 {
-                    Id = f.Id,
-                    DepartureDate = f.DepartureDate,
-                    DepartureAirport = f.DepartureAirport,
-                    DepartureManualLocation = f.DepartureManualLocation,
-                    ArrivalDate = f.ArrivalDate,
-                    ArrivalAirport = f.ArrivalAirport,
-                    ArrivalManualLocation = f.ArrivalManualLocation,
-                    AircraftType = f.AircraftType,
-                    HasOvernight = f.HasOvernight,
-                    FlightComment = f.FlightComment,
-                    ArrivalTime = f.ArrivalTime,
-                    DepartureTime = f.DepartureTime,
-                    Pilot = new PilotResponseModel
-                    {
-                        Id = f.User.Id,
-                        Name = f.User.Name,
-                        Email = f.User.Email,
-                        Phone = f.User.Phone
-                    }
-                }).ToListAsync(cancellationToken);
+                    Id = f.User.Id,
+                    Name = f.User.Name,
+                    Email = f.User.Email,
+                    Phone = f.User.Phone
+                },
+                UserAlreadyInterested = userInterests.Contains(f.Id)
+            }).ToList();
 
             return result;
         }
 
-        public Task<SearchFlightFormsResponseModel> Handle(GetFlightFormById request, CancellationToken cancellationToken)
+
+        public async Task<SearchFlightFormsResponseModel> Handle(GetFlightFormById request, CancellationToken cancellationToken)
         {
-            var flightForm = _unitOfWork.FlightFormRepository
+            var userId = _userContext.GetUserId();
+
+            var flightForm = await _unitOfWork.FlightFormRepository
                 .Query(include => include.Include(f => f.User))
                 .FirstOrDefaultAsync(f => f.Id == request.FlightFormId, cancellationToken);
 
-            return flightForm.ContinueWith(task =>
+            if (flightForm == null)
             {
-                if (task.Result == null)
+                _notification.AddNotification("GetFlightFormById", "Ficha de voo não encontrada.");
+                return new SearchFlightFormsResponseModel();
+            }
+
+            var userAlreadyInterested = await _unitOfWork.FlightFormInterestRepository
+                .ExistsAsync(userId, request.FlightFormId);
+
+            return new SearchFlightFormsResponseModel
+            {
+                Id = flightForm.Id,
+                DepartureDate = flightForm.DepartureDate,
+                DepartureTime = flightForm.DepartureTime,
+                DepartureAirport = flightForm.DepartureAirport,
+                DepartureManualLocation = flightForm.DepartureManualLocation,
+                ArrivalDate = flightForm.ArrivalDate,
+                ArrivalTime = flightForm.ArrivalTime,
+                ArrivalAirport = flightForm.ArrivalAirport,
+                ArrivalManualLocation = flightForm.ArrivalManualLocation,
+                AircraftType = flightForm.AircraftType,
+                FlightComment = flightForm.FlightComment,
+                HasOvernight = flightForm.HasOvernight,
+                Pilot = new PilotResponseModel
                 {
-                    _notification.AddNotification("GetFlightFormById", "Ficha de voo não encontrada.");
-                    return new SearchFlightFormsResponseModel();
-                }
-                var f = task.Result;
-                return new SearchFlightFormsResponseModel
-                {
-                    Id = f.Id,
-                    DepartureDate = f.DepartureDate,
-                    DepartureAirport = f.DepartureAirport,
-                    DepartureManualLocation = f.DepartureManualLocation,
-                    ArrivalDate = f.ArrivalDate,
-                    ArrivalAirport = f.ArrivalAirport,
-                    ArrivalManualLocation = f.ArrivalManualLocation,
-                    AircraftType = f.AircraftType,
-                    HasOvernight = f.HasOvernight,
-                    FlightComment = f.FlightComment,
-                    ArrivalTime = f.ArrivalTime,
-                    DepartureTime = f.DepartureTime,
-                    Pilot = new PilotResponseModel
-                    {
-                        Id = f.User.Id,
-                        Name = f.User.Name,
-                        Email = f.User.Email,
-                        Phone = f.User.Phone
-                    }
-                };
-            }, cancellationToken);
+                    Id = flightForm.User.Id,
+                    Name = flightForm.User.Name,
+                    Email = flightForm.User.Email,
+                    Phone = flightForm.User.Phone
+                },
+                UserAlreadyInterested = userAlreadyInterested
+            };
         }
     }
 }

@@ -22,6 +22,7 @@ namespace API.FlySic.Domain.Models.Response
         public string AircraftType { get; set; } = string.Empty;
         public bool HasOvernight { get; set; }
         public string? FlightComment { get; set; }
+        public bool UserAlreadyInterested { get; set; }
         public PilotResponseModel Pilot { get; set; } = null!;
     }
 }
