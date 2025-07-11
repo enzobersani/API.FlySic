@@ -1,4 +1,5 @@
-﻿using API.FlySic.Domain.Interfaces.Context;
+﻿using API.FlySic.Domain.Enum;
+using API.FlySic.Domain.Interfaces.Context;
 using API.FlySic.Domain.Interfaces.UnitOfWork;
 using API.FlySic.Domain.Models.Response;
 using API.FlySic.Domain.Notifications;
@@ -64,6 +65,7 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 Name = i.InterestedUser.Name,
                 Email = i.InterestedUser.Email,
                 Phone = i.InterestedUser.Phone,
+                IsAccepted = i.Status == FlightFormInterestStatus.Accepted
             }).ToList();
         }
 

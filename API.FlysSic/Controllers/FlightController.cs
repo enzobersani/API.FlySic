@@ -1,6 +1,5 @@
 ﻿using API.FlySic.Controllers.Base;
 using API.FlySic.Domain.Commands;
-using API.FlySic.Domain.Entities;
 using API.FlySic.Domain.Interfaces.Context;
 using API.FlySic.Domain.Models.Response;
 using API.FlySic.Domain.Models.Response.Base;
@@ -37,7 +36,6 @@ namespace API.FlySic.Controllers
         /// <summary>
         /// Retorna lista de fichas de voo do piloto autenticado.
         /// </summary>
-        /// <param name="request"></param>
         /// <returns></returns>
         [HttpGet("my-flights")]
         [Produces("application/json")]
@@ -97,5 +95,27 @@ namespace API.FlySic.Controllers
         [ProducesResponseType(typeof(Notification), 400)]
         public async Task<IActionResult> GetFlightFormById(Guid flightFormId)
             => Response(await _mediator.Send(new GetFlightFormById(flightFormId)), 200);
+
+        /// <summary>
+        /// Piloto aceita interesse em seu voo.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("accept")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(BaseResponse), 200)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        public async Task<IActionResult> AcceptInterest([FromBody] AcceptFlightInterestCommand request)
+        {
+            var pilotId = _userContext.GetUserId();
+            var command = new AcceptFlightInterestCommand
+            {
+                FlightFormId = request.FlightFormId,
+                InterestId = request.InterestId,
+                PilotId = pilotId
+            };
+
+            return Response(await _mediator.Send(command), 200);
+        }
     }
 }

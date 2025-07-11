@@ -7,5 +7,6 @@ namespace API.FlySic.Domain.Interfaces.Repositories
     {
         Task<bool> ExistsAsync(Guid userId, Guid flightFormId);
         Task<List<FlightFormInterest>> GetByFlightFormIdAsync(Guid flightFormId);
+        Task<FlightFormInterest?> GetByInterestId(Guid interestId, Guid flightFormId);
     }
 }

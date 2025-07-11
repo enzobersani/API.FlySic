@@ -27,5 +27,11 @@ namespace API.FlySic.Infrastructure.Repositories
                 .Where(x => x.FlightFormId == flightFormId)
                 .ToListAsync();
         }
+
+        public async Task<FlightFormInterest?> GetByInterestId(Guid interestId, Guid flightFormId)
+        {
+            return await _context.FlightFormInterests
+                .FirstOrDefaultAsync(x => x.InterestedUserId == interestId && x.FlightFormId == flightFormId);
+        }
     }
 }
