@@ -1,6 +1,7 @@
 ﻿using API.FlySic.Domain.Commands;
 using API.FlySic.Domain.Entities.Base;
 using API.FlySic.Domain.Enum;
+using API.FlySic.Domain.Handlers.CommandHandlers;
 using Mapster;
 
 namespace API.FlySic.Domain.Entities
@@ -39,6 +40,23 @@ namespace API.FlySic.Domain.Entities
             flightForm.ArrivalTime = flightForm.ArrivalTime.ToUniversalTime();
             flightForm.Status = FlightFormStatus.Aberta;
             return flightForm;
+        }
+
+        public void Update(UpdateFlightFormCommand request)
+        {
+            DepartureDate = request.DepartureDate.ToUniversalTime();
+            DepartureTime = request.DepartureTime.ToUniversalTime();
+            DepartureAirport = request.DepartureAirport;
+            DepartureManualLocation = request.DepartureManualLocation;
+
+            ArrivalDate = request.ArrivalDate.ToUniversalTime();
+            ArrivalTime = request.ArrivalTime.ToUniversalTime();
+            ArrivalAirport = request.ArrivalAirport;
+            ArrivalManualLocation = request.ArrivalManualLocation;
+
+            AircraftType = request.AircraftType;
+            FlightComment = request.FlightComment;
+            HasOvernight = request.HasOvernight;
         }
     }
 }

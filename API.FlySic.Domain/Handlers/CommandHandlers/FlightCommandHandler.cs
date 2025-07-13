@@ -17,7 +17,8 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
 {
     public class FlightCommandHandler : IRequestHandler<NewFlightFormCommand, BaseResponse>,
                                         IRequestHandler<ExpressInterestCommand, BaseResponse>,
-                                        IRequestHandler<AcceptFlightInterestCommand, BaseResponse>
+                                        IRequestHandler<AcceptFlightInterestCommand, BaseResponse>,
+                                        IRequestHandler<UpdateFlightFormCommand, BaseUpdateResponse>
     {
         private readonly INotificationService _notificaion;
         private readonly IUnitOfWork _unitOfWork;
@@ -115,6 +116,33 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
             {
                 Id = interest.Id,
             };
+        }
+
+        public async Task<BaseUpdateResponse> Handle(UpdateFlightFormCommand request, CancellationToken cancellationToken)
+        {
+            request.UserId = _userContext.GetUserId();
+            if (request.UserId == Guid.Empty)
+            {
+                _notificaion.AddNotification("Unauthorized", "Não autorizado!");
+                return new BaseUpdateResponse();
+            }
+
+            var flightForm = await _unitOfWork.FlightFormRepository.GetByIdAsync(request.Id);
+            if (flightForm is null)
+            {
+                _notificaion.AddNotification("Handle", "Ficha de voo não encontrada.");
+                return new BaseUpdateResponse();
+            }
+
+            if (flightForm.UserId != request.UserId)
+            {
+                _notificaion.AddNotification("Handle", "Você não tem permissão para atualizar esta ficha de voo.");
+                return new BaseUpdateResponse();
+            }
+
+            flightForm.Update(request);
+            await _unitOfWork.FlightFormRepository.UpdateAsync(flightForm);
+            return new BaseUpdateResponse(); 
         }
 
         #region Private Methods

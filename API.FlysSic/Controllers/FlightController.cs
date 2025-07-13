@@ -1,5 +1,6 @@
 ﻿using API.FlySic.Controllers.Base;
 using API.FlySic.Domain.Commands;
+using API.FlySic.Domain.Handlers.CommandHandlers;
 using API.FlySic.Domain.Interfaces.Context;
 using API.FlySic.Domain.Models.Response;
 using API.FlySic.Domain.Models.Response.Base;
@@ -116,6 +117,22 @@ namespace API.FlySic.Controllers
             };
 
             return Response(await _mediator.Send(command), 200);
+        }
+
+        /// <summary>
+        /// Atualiza ficha de voo.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("{id}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(BaseUpdateResponse), 200)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateFlightFormCommand request)
+        {
+            request.Id = id;
+            return Response(await _mediator.Send(request), 200);
         }
     }
 }
