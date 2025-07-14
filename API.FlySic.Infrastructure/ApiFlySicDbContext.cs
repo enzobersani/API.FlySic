@@ -10,6 +10,7 @@ namespace API.FlySic.Infrastructure
         public DbSet<FlightForm> FlightForms { get; set; }
         public DbSet<FlightFormInterest> FlightFormInterests { get; set; }
         public DbSet<RecoveryCode> RecoveryCodes { get; set; }
+        public DbSet<FlightRating> FlightRatings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
