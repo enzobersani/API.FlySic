@@ -81,10 +81,17 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 query = query.Where(f => f.UserId != userId);
 
             if (request.DepartureDate.HasValue)
-                query = query.Where(f => f.DepartureDate.Date == request.DepartureDate.Value.Date);
+            {
+                var start = DateTime.SpecifyKind(request.DepartureDate.Value, DateTimeKind.Utc);
+                query = query.Where(f => f.DepartureDate >= start);
+            }
 
             if (request.ArrivalDate.HasValue)
-                query = query.Where(f => f.ArrivalDate.Date == request.ArrivalDate.Value.Date);
+            {
+                var end = DateTime.SpecifyKind(request.ArrivalDate.Value, DateTimeKind.Utc).AddDays(1);
+                query = query.Where(f => f.ArrivalDate <= end);
+            }
+
 
             if (!string.IsNullOrWhiteSpace(request.DepartureLocation))
                 query = query.Where(f =>
