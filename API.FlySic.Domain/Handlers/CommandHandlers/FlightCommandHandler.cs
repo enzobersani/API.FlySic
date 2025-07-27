@@ -18,7 +18,8 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
     public class FlightCommandHandler : IRequestHandler<NewFlightFormCommand, BaseResponse>,
                                         IRequestHandler<ExpressInterestCommand, BaseResponse>,
                                         IRequestHandler<AcceptFlightInterestCommand, BaseResponse>,
-                                        IRequestHandler<UpdateFlightFormCommand, BaseUpdateResponse>
+                                        IRequestHandler<UpdateFlightFormCommand, BaseUpdateResponse>,
+                                        IRequestHandler<FinishFlightFormCommand, BaseResponse>
     {
         private readonly INotificationService _notificaion;
         private readonly IUnitOfWork _unitOfWork;
@@ -32,6 +33,8 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
             _userContext = userContext;
             _emailService = emailService;
         }
+
+        #region Nova Ficha de voo
         public async Task<BaseResponse> Handle(NewFlightFormCommand request, CancellationToken cancellationToken)
         {
             request.UserId = _userContext.GetUserId();
@@ -48,7 +51,9 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
                 Id = flightForm.Id,
             };
         }
+        #endregion
 
+        #region Expressar Interesse
         public async Task<BaseResponse> Handle(ExpressInterestCommand request, CancellationToken cancellationToken)
         {
             var userId = _userContext.GetUserId();
@@ -78,7 +83,9 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
                 Id = interest.Id,
             };
         }
+        #endregion
 
+        #region Aceitar Interesse
         public async Task<BaseResponse> Handle(AcceptFlightInterestCommand request, CancellationToken cancellationToken)
         {
             var flight = await _unitOfWork.FlightFormRepository.GetByIdAsync(request.FlightFormId);
@@ -111,13 +118,17 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
                 other.Reject();
             }
 
+            flight.UpdateStatus(FlightFormStatus.Fechada);
+
             await _unitOfWork.CommitAsync();
             return new BaseResponse
             {
                 Id = interest.Id,
             };
         }
+        #endregion
 
+        #region Atualizar Ficha de Voo
         public async Task<BaseUpdateResponse> Handle(UpdateFlightFormCommand request, CancellationToken cancellationToken)
         {
             request.UserId = _userContext.GetUserId();
@@ -144,6 +155,38 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
             await _unitOfWork.FlightFormRepository.UpdateAsync(flightForm);
             return new BaseUpdateResponse(); 
         }
+
+
+        #endregion
+
+        #region Finalizar Ficha de Voo
+        public async Task<BaseResponse> Handle(FinishFlightFormCommand request, CancellationToken cancellationToken)
+        {
+            var flightForm = await _unitOfWork.FlightFormRepository.GetByIdAsync(request.FlightFormId);
+            if (flightForm is null)
+                _notificaion.AddNotification("Handle", "Ficha de voo não encontrada.");
+
+            var evaluated = await _unitOfWork.UserRepository.GetByIdAsync(request.EvaluatedId);
+            if (evaluated is null)
+                _notificaion.AddNotification("Handle", "Usuário avaliado não encontrado.");
+
+            if (_notificaion.HasNotifications()) return new BaseResponse();
+
+            if (flightForm.Status != FlightFormStatus.Fechada)
+            {
+                _notificaion.AddNotification("Handle", "A ficha de voo não está fechada. Você só pode finalizar uma ficha de voo que foi fechada.");
+                return new BaseResponse();
+            }
+
+            var flightRating = FlightRating.New(request);
+            flightForm.UpdateStatus(FlightFormStatus.Concluida);
+            await _unitOfWork.FlightRatingRepository.AddAsync(flightRating);
+            return new BaseResponse
+            {
+                Id = flightRating.Id,
+            };
+        }
+        #endregion
 
         #region Private Methods
         private async Task SendEmailAsync(User pilot, User interested, FlightForm flightForm)

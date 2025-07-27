@@ -12,7 +12,8 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
     public class FlightQueryHandler : IRequestHandler<MyFlightFormsQuery, List<MyFlightFormsResponseModel>>,
                                       IRequestHandler<GetFlightInterestsQuery, List<FlightInterestResponse>>,
                                       IRequestHandler<SearchFlightFormsQuery, List<SearchFlightFormsResponseModel>>,
-                                      IRequestHandler<GetFlightFormById, SearchFlightFormsResponseModel>
+                                      IRequestHandler<GetFlightFormById, SearchFlightFormsResponseModel>,
+                                      IRequestHandler<GetStatusFlightFormQuery, StatusFlightFormResponseModel>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationService _notification;
@@ -182,6 +183,24 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                     Phone = flightForm.User.Phone
                 },
                 UserAlreadyInterested = userAlreadyInterested
+            };
+        }
+
+        public async Task<StatusFlightFormResponseModel> Handle(GetStatusFlightFormQuery request, CancellationToken cancellationToken)
+        {
+            var flightForm = await _unitOfWork.FlightFormRepository.GetByIdAsync(request.FlightFormId);
+            if (flightForm is null)
+            {
+                _notification.AddNotification("GetStatusFlightFormQuery", "Ficha de voo não encontrada.");
+                return new StatusFlightFormResponseModel();
+            }
+
+            var evaluatedId = await _unitOfWork.FlightFormInterestRepository.GetEvaluated(request.FlightFormId);
+
+            return new StatusFlightFormResponseModel
+            {
+                Status = flightForm.Status,
+                EvaluatedId = evaluatedId
             };
         }
     }

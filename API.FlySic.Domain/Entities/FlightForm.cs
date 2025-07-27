@@ -1,7 +1,6 @@
 ﻿using API.FlySic.Domain.Commands;
 using API.FlySic.Domain.Entities.Base;
 using API.FlySic.Domain.Enum;
-using API.FlySic.Domain.Handlers.CommandHandlers;
 using Mapster;
 
 namespace API.FlySic.Domain.Entities
@@ -57,6 +56,13 @@ namespace API.FlySic.Domain.Entities
             AircraftType = request.AircraftType;
             FlightComment = request.FlightComment;
             HasOvernight = request.HasOvernight;
+            SetUpdatedAt();
+        }
+
+        public void UpdateStatus(FlightFormStatus status)
+        {
+            Status = status;
+            SetUpdatedAt();
         }
     }
 }

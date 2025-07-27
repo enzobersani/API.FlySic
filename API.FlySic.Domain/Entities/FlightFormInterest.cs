@@ -31,10 +31,12 @@ namespace API.FlySic.Domain.Entities
         public void Accept()
         {
             Status = FlightFormInterestStatus.Accepted;
+            SetUpdatedAt();
         }
         public void Reject()
         {
             Status = FlightFormInterestStatus.Rejected;
+            SetUpdatedAt();
         }
     }
 }

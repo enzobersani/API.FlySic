@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace API.FlySic.Domain.Handlers.CommandHandlers
+namespace API.FlySic.Domain.Commands
 {
     public class UpdateFlightFormCommand : IRequest<BaseUpdateResponse>
     {

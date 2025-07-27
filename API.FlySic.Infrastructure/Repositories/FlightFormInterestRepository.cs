@@ -1,4 +1,5 @@
 ﻿using API.FlySic.Domain.Entities;
+using API.FlySic.Domain.Enum;
 using API.FlySic.Domain.Interfaces.Repositories;
 using API.FlySic.Domain.Notifications;
 using API.FlySic.Infrastructure.Repositories.Base;
@@ -32,6 +33,13 @@ namespace API.FlySic.Infrastructure.Repositories
         {
             return await _context.FlightFormInterests
                 .FirstOrDefaultAsync(x => x.InterestedUserId == interestId && x.FlightFormId == flightFormId);
+        }
+
+        public async Task<Guid> GetEvaluated(Guid flightFormId)
+        {
+            return (await _context.FlightFormInterests
+                    .FirstOrDefaultAsync(x => x.Status == FlightFormInterestStatus.Accepted))
+                    .InterestedUserId;
         }
     }
 }

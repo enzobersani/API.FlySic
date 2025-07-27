@@ -14,5 +14,6 @@ namespace API.FlySic.Domain.Interfaces.UnitOfWork
         IFlightFormRepository FlightFormRepository { get; }
         IFlightFormInterestRepository FlightFormInterestRepository { get; }
         IRecoveryCodeRepository RecoveryCodeRepository { get; }
+        IFlightRatingRepository FlightRatingRepository { get; }
     }
 }

@@ -19,6 +19,8 @@ namespace API.FlySic.Infrastructure.UnitOfWork
         private IFlightFormRepository _flightFormRepository;
         private IFlightFormInterestRepository _flightFormInterestRepository;
         private IRecoveryCodeRepository _recoveryCodeRepository;
+        private IFlightRatingRepository _flightRatingRepository;
+
         public UnitOfWork(ApiFlySicDbContext context, INotificationService notifications)
         {
             _context = context;
@@ -33,6 +35,9 @@ namespace API.FlySic.Infrastructure.UnitOfWork
             => _flightFormInterestRepository ??= new FlightFormInterestRepository(_context, _notifications);
         public IRecoveryCodeRepository RecoveryCodeRepository
             => _recoveryCodeRepository ??= new RecoveryCodeRepository(_context, _notifications);
+        public IFlightRatingRepository FlightRatingRepository
+            => _flightRatingRepository ??= new FlightRatingRepository(_context, _notifications);
+
         public async Task<bool> CommitAsync()
         {
             try

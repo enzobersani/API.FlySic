@@ -1,6 +1,5 @@
 ﻿using API.FlySic.Controllers.Base;
 using API.FlySic.Domain.Commands;
-using API.FlySic.Domain.Handlers.CommandHandlers;
 using API.FlySic.Domain.Interfaces.Context;
 using API.FlySic.Domain.Models.Response;
 using API.FlySic.Domain.Models.Response.Base;
@@ -134,5 +133,29 @@ namespace API.FlySic.Controllers
             request.Id = id;
             return Response(await _mediator.Send(request), 200);
         }
+
+        /// <summary>
+        /// Retorna o status da ficha de voo.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("status/{id:guid}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(StatusFlightFormResponseModel), 200)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        public async Task<IActionResult> GetStatus(Guid id)
+            => Response(await _mediator.Send(new GetStatusFlightFormQuery(id)), 200);
+
+        /// <summary>
+        /// Finaliza a ficha de voo.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("finish")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(BaseResponse), 201)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        public async Task<IActionResult> Finish([FromBody] FinishFlightFormCommand request)
+            => Response(await _mediator.Send(request), 201);
     }
 }

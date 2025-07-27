@@ -1,4 +1,6 @@
-﻿using API.FlySic.Domain.Entities.Base;
+﻿using API.FlySic.Domain.Commands;
+using API.FlySic.Domain.Entities.Base;
+using Mapster;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,14 +22,11 @@ namespace API.FlySic.Domain.Entities
 
         private FlightRating() { }
 
-        public FlightRating(Guid flightFormId, Guid evaluatorId, Guid evaluatedId, int rating, string? comment)
+        public static FlightRating New(FinishFlightFormCommand request)
         {
-            FlightFormId = flightFormId;
-            EvaluatorId = evaluatorId;
-            EvaluatedId = evaluatedId;
-            Rating = rating;
-            Comment = comment;
-            CreatedAt = DateTime.UtcNow;
+            var flightRating = new FlightRating();
+            request.Adapt(flightRating);
+            return flightRating;
         }
     }
 }
