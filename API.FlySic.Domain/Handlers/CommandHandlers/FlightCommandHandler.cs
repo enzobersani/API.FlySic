@@ -19,7 +19,8 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
                                         IRequestHandler<ExpressInterestCommand, BaseResponse>,
                                         IRequestHandler<AcceptFlightInterestCommand, BaseResponse>,
                                         IRequestHandler<UpdateFlightFormCommand, BaseUpdateResponse>,
-                                        IRequestHandler<FinishFlightFormCommand, BaseResponse>
+                                        IRequestHandler<FinishFlightFormCommand, BaseResponse>,
+                                        IRequestHandler<CancelFlightFormCommand, BaseResponse>
     {
         private readonly INotificationService _notificaion;
         private readonly IUnitOfWork _unitOfWork;
@@ -184,6 +185,31 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
             return new BaseResponse
             {
                 Id = flightRating.Id,
+            };
+        }
+        #endregion
+
+        #region Cancelar Ficha de Voo
+        public async Task<BaseResponse> Handle(CancelFlightFormCommand request, CancellationToken cancellationToken)
+        {
+            var flightForm = await _unitOfWork.FlightFormRepository.GetByIdAsync(request.FlightFormId);
+            if (flightForm is null)
+            {
+                _notificaion.AddNotification("Handle", "Ficha de voo não encontrada.");
+                return new BaseResponse();
+            }
+
+            if (flightForm.Status != FlightFormStatus.Aberta && flightForm.Status != FlightFormStatus.Fechada)
+            {
+                _notificaion.AddNotification("Handle", "A ficha de voo só pode ser cancelada se estiver aberta ou fechada.");
+                return new BaseResponse();
+            }
+
+            flightForm.UpdateStatus(FlightFormStatus.Cancelada);
+            await _unitOfWork.FlightFormRepository.UpdateAsync(flightForm);
+            return new BaseResponse
+            {
+                Id = flightForm.Id,
             };
         }
         #endregion

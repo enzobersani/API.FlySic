@@ -24,6 +24,8 @@ namespace API.FlySic
         public static void ConfigureValidators(this IServiceCollection services)
         {
             services.AddValidatorsFromAssemblyContaining<NewUserCommandValidator>();
+            services.AddValidatorsFromAssemblyContaining<SearchFlightFormsQueryValidator>();
+            services.AddValidatorsFromAssemblyContaining<NewFlightFormCommandValidator>();
         }
     }
 }

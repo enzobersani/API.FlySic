@@ -35,11 +35,11 @@ namespace API.FlySic.Infrastructure.Repositories
                 .FirstOrDefaultAsync(x => x.InterestedUserId == interestId && x.FlightFormId == flightFormId);
         }
 
-        public async Task<Guid> GetEvaluated(Guid flightFormId)
+        public async Task<Guid?> GetEvaluated(Guid flightFormId)
         {
             return (await _context.FlightFormInterests
                     .FirstOrDefaultAsync(x => x.Status == FlightFormInterestStatus.Accepted))
-                    .InterestedUserId;
+                    ?.InterestedUserId;
         }
     }
 }

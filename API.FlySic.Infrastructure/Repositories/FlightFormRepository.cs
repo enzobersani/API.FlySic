@@ -1,4 +1,5 @@
 ﻿using API.FlySic.Domain.Entities;
+using API.FlySic.Domain.Enum;
 using API.FlySic.Domain.Interfaces.Repositories;
 using API.FlySic.Domain.Notifications;
 using API.FlySic.Infrastructure.Repositories.Base;
@@ -21,5 +22,10 @@ namespace API.FlySic.Infrastructure.Repositories
 
         public async Task<List<FlightForm>> GetByUserId(Guid userId)
             => await _context.FlightForms.AsNoTracking().Where(x => x.UserId == userId).ToListAsync();
+
+        public async Task<List<FlightForm>> GetByUserAndStatus(Guid userId, FlightFormStatus status)
+            => await _context.FlightForms.AsNoTracking()
+                                         .Where(x => x.UserId == userId && x.Status == status)
+                                         .ToListAsync(); 
     }
 }

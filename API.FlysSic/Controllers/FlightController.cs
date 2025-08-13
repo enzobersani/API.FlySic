@@ -31,21 +31,24 @@ namespace API.FlySic.Controllers
         [ProducesResponseType(typeof(BaseResponse), 201)]
         [ProducesResponseType(typeof(Notification), 400)]
         public async Task<IActionResult> Post([FromBody] NewFlightFormCommand request)
-            => Response(await _mediator.Send(request), 201);
+        {
+            if (request is null) return BadRequest("Body is required.");
+            return Response(await _mediator.Send(request), 201);
+        }
 
         /// <summary>
         /// Retorna lista de fichas de voo do piloto autenticado.
         /// </summary>
         /// <returns></returns>
-        [HttpGet("my-flights")]
+        [HttpGet("my-flights/{status}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(List<MyFlightFormsResponseModel>), 200)]
         [ProducesResponseType(typeof(Notification), 400)]
-        public async Task<IActionResult> GetMyFlights()
+        public async Task<IActionResult> GetMyFlights(int status)
         {
             var userId = _userContext.GetUserId();
             if (userId == Guid.Empty) return Unauthorized();
-            return Response(await _mediator.Send(new MyFlightFormsQuery(userId)), 200);
+            return Response(await _mediator.Send(new MyFlightFormsQuery(userId, status)), 200);
         }
 
         /// <summary>
@@ -156,6 +159,18 @@ namespace API.FlySic.Controllers
         [ProducesResponseType(typeof(BaseResponse), 201)]
         [ProducesResponseType(typeof(Notification), 400)]
         public async Task<IActionResult> Finish([FromBody] FinishFlightFormCommand request)
-            => Response(await _mediator.Send(request), 201);
+            => Response(await _mediator.Send(request), 200);
+
+        /// <summary>
+        /// Finaliza a ficha de voo.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("cancel")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(BaseResponse), 201)]
+        [ProducesResponseType(typeof(Notification), 400)]
+        public async Task<IActionResult> Cancel([FromBody] CancelFlightFormCommand request)
+            => Response(await _mediator.Send(request), 200);
     }
 }

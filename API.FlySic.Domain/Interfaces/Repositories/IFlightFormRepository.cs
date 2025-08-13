@@ -1,4 +1,5 @@
 ﻿using API.FlySic.Domain.Entities;
+using API.FlySic.Domain.Enum;
 using API.FlySic.Domain.Interfaces.Repositories.Base;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,6 @@ namespace API.FlySic.Domain.Interfaces.Repositories
     public interface IFlightFormRepository : IBaseRepository<FlightForm>
     {
         Task<List<FlightForm>> GetByUserId(Guid userId);
+        Task<List<FlightForm>> GetByUserAndStatus(Guid userId, FlightFormStatus status);
     }
 }

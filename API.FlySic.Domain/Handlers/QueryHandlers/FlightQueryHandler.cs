@@ -35,7 +35,7 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 return new List<MyFlightFormsResponseModel>();
             }
 
-            var flightForms = await _unitOfWork.FlightFormRepository.GetByUserId(user.Id);
+            var flightForms = await _unitOfWork.FlightFormRepository.GetByUserAndStatus(user.Id, request.Status);
 
             var result = flightForms.Select(f => new MyFlightFormsResponseModel
             {
@@ -81,18 +81,31 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
             if (userId != Guid.Empty)
                 query = query.Where(f => f.UserId != userId);
 
+            // ===== Só voos futuros (UTC): datas após hoje OU hoje com horário ainda por ocorrer =====
+            var todayUtc = DateTime.UtcNow.Date;
+            var nowTimeUtc = DateTime.UtcNow.TimeOfDay;
+
+            query = query.Where(f =>
+                f.DepartureDate.Date > todayUtc ||
+                (f.DepartureDate.Date == todayUtc && f.DepartureTime.TimeOfDay >= nowTimeUtc)
+            );
+            // ========================================================================================
+
+            // ===== Filtros do usuário: apenas DATA, dia inteiro [data, data+1) =====
             if (request.DepartureDate.HasValue)
             {
-                var start = DateTime.SpecifyKind(request.DepartureDate.Value, DateTimeKind.Utc);
-                query = query.Where(f => f.DepartureDate >= start);
+                var day = DateTime.SpecifyKind(request.DepartureDate.Value, DateTimeKind.Utc).Date;
+                var next = day.AddDays(1);
+                query = query.Where(f => f.DepartureDate >= day && f.DepartureDate < next);
             }
 
             if (request.ArrivalDate.HasValue)
             {
-                var end = DateTime.SpecifyKind(request.ArrivalDate.Value, DateTimeKind.Utc).AddDays(1);
-                query = query.Where(f => f.ArrivalDate <= end);
+                var day = DateTime.SpecifyKind(request.ArrivalDate.Value, DateTimeKind.Utc).Date;
+                var next = day.AddDays(1);
+                query = query.Where(f => f.ArrivalDate >= day && f.ArrivalDate < next);
             }
-
+            // ========================================================================================
 
             if (!string.IsNullOrWhiteSpace(request.DepartureLocation))
                 query = query.Where(f =>
@@ -106,6 +119,7 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
 
             var flights = await query
                 .OrderBy(f => f.DepartureDate)
+                .ThenBy(f => f.DepartureTime) // ordena por horário dentro do dia
                 .ToListAsync(cancellationToken);
 
             var flightFormIds = flights.Select(f => f.Id).ToList();
@@ -142,7 +156,6 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
 
             return result;
         }
-
 
         public async Task<SearchFlightFormsResponseModel> Handle(GetFlightFormById request, CancellationToken cancellationToken)
         {
@@ -200,7 +213,7 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
             return new StatusFlightFormResponseModel
             {
                 Status = flightForm.Status,
-                EvaluatedId = evaluatedId
+                EvaluatedId = evaluatedId ?? Guid.Empty
             };
         }
     }
