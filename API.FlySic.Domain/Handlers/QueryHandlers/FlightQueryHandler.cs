@@ -1,4 +1,5 @@
-﻿using API.FlySic.Domain.Enum;
+﻿using API.FlySic.Domain.Entities;
+using API.FlySic.Domain.Enum;
 using API.FlySic.Domain.Interfaces.Context;
 using API.FlySic.Domain.Interfaces.UnitOfWork;
 using API.FlySic.Domain.Models.Response;
@@ -37,7 +38,7 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
 
             var flightForms = await _unitOfWork.FlightFormRepository.GetByUserAndStatus(user.Id, request.Status);
 
-            var result = flightForms.Select(f => new MyFlightFormsResponseModel
+            var tasks = flightForms.Select(async f => new MyFlightFormsResponseModel
             {
                 Id = f.Id,
                 DepartureDate = f.DepartureDate,
@@ -50,10 +51,13 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 ArrivalManualLocation = f.ArrivalManualLocation,
                 AircraftType = f.AircraftType,
                 FlightComment = f.FlightComment,
-                HasOvernight = f.HasOvernight
-            }).ToList();
+                HasOvernight = f.HasOvernight,
+                QuantityInterested = await QuantityInterested(f.Id, f)
+            });
 
-            return result;
+            var result = await Task.WhenAll(tasks);
+
+            return result.ToList();
         }
 
         public async Task<List<FlightInterestResponse>> Handle(GetFlightInterestsQuery request, CancellationToken cancellationToken)
@@ -216,5 +220,17 @@ namespace API.FlySic.Domain.Handlers.QueryHandlers
                 EvaluatedId = evaluatedId ?? Guid.Empty
             };
         }
+
+        #region Private Methods
+        private async Task<int> QuantityInterested(Guid flightFormId, FlightForm flightForm)
+        {
+            if (flightForm.Status != FlightFormStatus.Aberta)
+                return 0;
+
+            return await _unitOfWork.FlightFormInterestRepository
+                .Query()
+                .CountAsync(i => i.FlightFormId == flightFormId);
+        }
+        #endregion
     }
 }

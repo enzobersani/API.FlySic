@@ -3,16 +3,22 @@ using FluentValidation;
 
 namespace API.FlySic.Domain.Validators
 {
-    public class NewFlightFormCommandValidator : AbstractValidator<NewFlightFormCommand>
+    public class UpdateFlightFormCommandValidator : AbstractValidator<UpdateFlightFormCommand>
     {
-        public NewFlightFormCommandValidator()
+        public UpdateFlightFormCommandValidator()
         {
+            RuleFor(x => x.Id)
+                .NotEmpty().WithMessage("Id da ficha é obrigatório.");
+
             RuleFor(x => x.DepartureDate)
                 .NotEmpty().WithMessage("Data de partida é obrigatória.");
+
             RuleFor(x => x.DepartureTime)
                 .NotEmpty().WithMessage("Hora de partida é obrigatória.");
+
             RuleFor(x => x.ArrivalDate)
                 .NotEmpty().WithMessage("Data de chegada é obrigatória.");
+
             RuleFor(x => x.ArrivalTime)
                 .NotEmpty().WithMessage("Hora de chegada é obrigatória.");
 
@@ -23,18 +29,22 @@ namespace API.FlySic.Domain.Validators
             RuleFor(x => x.FlightComment)
                 .MaximumLength(500).WithMessage("Comentário do voo deve ter no máximo 500 caracteres.");
 
+            // Partida: ou aeroporto OU local manual (exatamente um)
             RuleFor(x => x)
                 .Must(x => ExactlyOneFilled(x.DepartureAirport, x.DepartureManualLocation))
                 .WithMessage("Informe apenas um local de partida: aeroporto OU local manual.");
 
+            // Chegada: ou aeroporto OU local manual (exatamente um)
             RuleFor(x => x)
                 .Must(x => ExactlyOneFilled(x.ArrivalAirport, x.ArrivalManualLocation))
                 .WithMessage("Informe apenas um local de chegada: aeroporto OU local manual.");
 
+            // Chegada > Partida (comparando data + hora)
             RuleFor(x => x)
                 .Must(x => Combine(x.ArrivalDate, x.ArrivalTime) > Combine(x.DepartureDate, x.DepartureTime))
                 .WithMessage("A data/hora de chegada deve ser posterior à data/hora de partida.");
 
+            // Regras de pernoite
             When(x => x.HasOvernight, () =>
             {
                 RuleFor(x => x)

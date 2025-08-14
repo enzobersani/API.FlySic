@@ -24,5 +24,6 @@ namespace API.FlySic.Domain.Models.Response
         public string AircraftType { get; set; } = string.Empty;
         public string? FlightComment { get; set; }
         public bool HasOvernight { get; set; }
+        public int QuantityInterested { get; set; } = 0;
     }
 }
