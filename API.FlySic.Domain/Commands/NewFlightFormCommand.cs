@@ -7,7 +7,7 @@ namespace API.FlySic.Domain.Commands
     public class NewFlightFormCommand : IRequest<BaseResponse>
     {
         [JsonIgnore]
-        public Guid UserId { get; set; }
+        public Guid PilotId { get; set; }
 
         [JsonPropertyName("partidaData")]
         public DateTime DepartureDate { get; set; }

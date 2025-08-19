@@ -20,8 +20,13 @@ namespace API.FlySic.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<FlightForm>> GetByUserId(Guid userId)
+        public async Task<List<FlightForm>> GetByPilotId(Guid userId)
             => await _context.FlightForms.AsNoTracking().Where(x => x.PilotId == userId).ToListAsync();
+
+        public async Task<List<FlightForm>> GetByAcceptedUserId(Guid userId)
+            => await _context.FlightForms.AsNoTracking()
+                                         .Include(x => x.User)
+                                         .Where(x => x.AcceptedUserId == userId).ToListAsync();
 
         public async Task<List<FlightForm>> GetByUserAndStatus(Guid userId, FlightFormStatus status)
             => await _context.FlightForms.AsNoTracking()

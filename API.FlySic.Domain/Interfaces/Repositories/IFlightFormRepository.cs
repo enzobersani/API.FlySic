@@ -11,7 +11,8 @@ namespace API.FlySic.Domain.Interfaces.Repositories
 {
     public interface IFlightFormRepository : IBaseRepository<FlightForm>
     {
-        Task<List<FlightForm>> GetByUserId(Guid userId);
+        Task<List<FlightForm>> GetByPilotId(Guid userId);
         Task<List<FlightForm>> GetByUserAndStatus(Guid userId, FlightFormStatus status);
+        Task<List<FlightForm>> GetByAcceptedUserId(Guid userId);
     }
 }

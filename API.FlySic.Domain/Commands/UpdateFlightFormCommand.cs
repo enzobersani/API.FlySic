@@ -1,18 +1,13 @@
 ﻿using API.FlySic.Domain.Models.Response.Base;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace API.FlySic.Domain.Commands
 {
     public class UpdateFlightFormCommand : IRequest<BaseUpdateResponse>
     {
         [JsonIgnore]
-        public Guid UserId { get; set; }
+        public Guid PilotId { get; set; }
 
         [JsonPropertyName("id")]
         public Guid Id { get; set; }

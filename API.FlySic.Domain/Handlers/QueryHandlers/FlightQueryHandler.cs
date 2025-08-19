@@ -242,7 +242,7 @@ public class FlightQueryHandler : IRequestHandler<MyFlightFormsQuery, List<MyFli
             return new List<MyFlightsResponseModel>();
         }
 
-        var flights = await _unitOfWork.FlightFormRepository.GetByUserId(user.Id);
+        var flights = await _unitOfWork.FlightFormRepository.GetByAcceptedUserId(user.Id);
         if (flights is null) return new List<MyFlightsResponseModel>();
 
         var result = new List<MyFlightsResponseModel>();

@@ -38,8 +38,8 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
         #region Nova Ficha de voo
         public async Task<BaseResponse> Handle(NewFlightFormCommand request, CancellationToken cancellationToken)
         {
-            request.UserId = _userContext.GetUserId();
-            if (request.UserId == Guid.Empty)
+            request.PilotId = _userContext.GetUserId();
+            if (request.PilotId == Guid.Empty)
             {
                 _notificaion.AddNotification("Unauthorized", "Não autorizado!");
                 return new BaseResponse();
@@ -135,8 +135,8 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
         #region Atualizar Ficha de Voo
         public async Task<BaseUpdateResponse> Handle(UpdateFlightFormCommand request, CancellationToken cancellationToken)
         {
-            request.UserId = _userContext.GetUserId();
-            if (request.UserId == Guid.Empty)
+            request.PilotId = _userContext.GetUserId();
+            if (request.PilotId == Guid.Empty)
             {
                 _notificaion.AddNotification("Unauthorized", "Não autorizado!");
                 return new BaseUpdateResponse();
@@ -149,7 +149,7 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
                 return new BaseUpdateResponse();
             }
 
-            if (flightForm.PilotId != request.UserId)
+            if (flightForm.PilotId != request.PilotId)
             {
                 _notificaion.AddNotification("Handle", "Você não tem permissão para atualizar esta ficha de voo.");
                 return new BaseUpdateResponse();

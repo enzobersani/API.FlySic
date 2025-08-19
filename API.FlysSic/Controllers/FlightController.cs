@@ -179,8 +179,8 @@ public class FlightController : ApiControllerBase
     /// <returns></returns>
     [HttpGet("my-flights")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(List<MyFlightFormsResponseModel>), 200)]
+    [ProducesResponseType(typeof(List<MyFlightsResponseModel>), 200)]
     [ProducesResponseType(typeof(Notification), 400)]
-    public async Task<IActionResult> GetMyFlights([FromBody] GetMyFlightsQuery request)
+    public async Task<IActionResult> GetMyFlights([FromQuery] GetMyFlightsQuery request)
         => Response(await _mediator.Send(request), 200);
 }
