@@ -2,6 +2,7 @@
 using API.FlySic.Domain.Interfaces.Repositories;
 using API.FlySic.Domain.Notifications;
 using API.FlySic.Infrastructure.Repositories.Base;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,9 @@ namespace API.FlySic.Infrastructure.Repositories
         {
             _context = context;
         }
+
+        public async Task<FlightRating?> GetByFlightFormId(Guid flightFormId)
+            => await _context.FlightRatings.AsNoTracking()
+                                           .FirstOrDefaultAsync(x => x.FlightFormId == flightFormId);
     }
 }

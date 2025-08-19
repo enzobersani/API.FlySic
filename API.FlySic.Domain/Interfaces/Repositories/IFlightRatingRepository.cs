@@ -10,5 +10,6 @@ namespace API.FlySic.Domain.Interfaces.Repositories
 {
     public interface IFlightRatingRepository : IBaseRepository<FlightRating>
     {
+        Task<FlightRating?> GetByFlightFormId(Guid flightFormId);
     }
 }

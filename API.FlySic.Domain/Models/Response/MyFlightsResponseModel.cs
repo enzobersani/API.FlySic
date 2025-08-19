@@ -1,9 +1,10 @@
-﻿namespace API.FlySic.Domain.Models.Response;
+﻿using API.FlySic.Domain.Enum;
 
-public class MyFlightFormsResponseModel
+namespace API.FlySic.Domain.Models.Response;
+
+public class MyFlightsResponseModel
 {
     public Guid Id { get; set; }
-
     public DateTime DepartureDate { get; set; }
     public DateTime DepartureTime { get; set; }
     public string? DepartureAirport { get; set; }
@@ -15,7 +16,9 @@ public class MyFlightFormsResponseModel
     public string? ArrivalManualLocation { get; set; }
 
     public string AircraftType { get; set; } = string.Empty;
-    public string? FlightComment { get; set; }
     public bool HasOvernight { get; set; }
-    public int QuantityInterested { get; set; } = 0;
+    public string? FlightComment { get; set; }
+    public FlightFormStatus Status { get; set; }
+    public PilotResponseModel Pilot { get; set; } = null!;
+    public RatingResponseModel? Rating { get; set; }
 }

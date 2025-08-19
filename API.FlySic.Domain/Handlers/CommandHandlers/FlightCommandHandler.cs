@@ -65,7 +65,7 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
             }
 
             var flightForm = await _unitOfWork.FlightFormRepository.GetByIdAsync(request.FlightFormId);
-            var pilotUserId = flightForm.UserId;
+            var pilotUserId = flightForm.PilotId;
             if (pilotUserId == userId)
             {
                 _notificaion.AddNotification("Handle", "Você não pode demonstrar interesse no seu proprio voo.");
@@ -96,7 +96,7 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
                 return new BaseResponse();
             }
 
-            if (flight.UserId != request.PilotId)
+            if (flight.PilotId != request.PilotId)
                 _notificaion.AddNotification("Handle", "Você não tem permissão para aceitar interessados nesta ficha.");
 
             if (flight.Status != FlightFormStatus.Aberta)
@@ -120,6 +120,9 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
             }
 
             flight.UpdateStatus(FlightFormStatus.Fechada);
+
+            var userInterested = await _unitOfWork.UserRepository.GetByIdAsync(interest.InterestedUserId);
+            flight.SetAcceptedUser(userInterested);
 
             await _unitOfWork.CommitAsync();
             return new BaseResponse
@@ -146,7 +149,7 @@ namespace API.FlySic.Domain.Handlers.CommandHandlers
                 return new BaseUpdateResponse();
             }
 
-            if (flightForm.UserId != request.UserId)
+            if (flightForm.PilotId != request.UserId)
             {
                 _notificaion.AddNotification("Handle", "Você não tem permissão para atualizar esta ficha de voo.");
                 return new BaseUpdateResponse();

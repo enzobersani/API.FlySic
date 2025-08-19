@@ -7,8 +7,11 @@ namespace API.FlySic.Domain.Entities
 {
     public class FlightForm : BaseEntity
     {
-        public Guid UserId { get; private set; }
+        public Guid PilotId { get; private set; }
         public User User { get; private set; } = null!;
+
+        public Guid? AcceptedUserId { get; private set; }
+        public User? AcceptedUser { get; private set; }
 
         public DateTime DepartureDate { get; private set; }
         public DateTime DepartureTime { get; private set; }
@@ -62,6 +65,13 @@ namespace API.FlySic.Domain.Entities
         public void UpdateStatus(FlightFormStatus status)
         {
             Status = status;
+            SetUpdatedAt();
+        }
+
+        public void SetAcceptedUser(User user)
+        {
+            AcceptedUser = user;
+            AcceptedUserId = user.Id;
             SetUpdatedAt();
         }
     }

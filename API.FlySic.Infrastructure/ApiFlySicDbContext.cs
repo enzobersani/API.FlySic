@@ -17,7 +17,7 @@ namespace API.FlySic.Infrastructure
             modelBuilder.Entity<FlightForm>()
             .HasOne(f => f.User)
             .WithMany()
-            .HasForeignKey(f => f.UserId)
+            .HasForeignKey(f => f.PilotId)
             .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
